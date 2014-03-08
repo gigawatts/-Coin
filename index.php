@@ -13,6 +13,21 @@ $x = array_reverse($trans);
 $bal = $nmc->getbalance("*", 6);
 $bal3 = $nmc->getbalance("*", 0);
 $bal2 = $bal - $bal3;
+// Calculate USD balance from Weighted Average Price
+$arr = json_decode(file_get_contents("http://preev.com/pulse/source:bitstamp,btce,localbitcoins,mtgox/unit:btc,usd"),true);
+$wavg = array();
+foreach( $arr['markets'] as $key => $value ) {
+	$wavg[$value['price']] = $value['vol'];
+}
+$total = 0;
+$count = 0;
+foreach( $wavg as $number=>$frequency) {
+  $total += $number * $frequency;
+  $count += $frequency;
+}
+$usd = round($total/$count,2);
+$balusd = round($bal * ($total/$count),2);
+
 ?>
 <!-- Java Script -->
 <script type='text/javascript'>
@@ -31,7 +46,9 @@ echo "
     <div class='span12'>
     <div class='row'>
     <div class='span5'>
-        <h3>Current Balance: <font color='green'>{$bal}</font></h1>
+        <h4><a href='http://preev.com/btc/usd'>Trading Price (USD):</a> <font color='blue'>\${$usd}</font></h2>
+        <h3>Current Balance (USD): <font color='green'>\${$balusd}</font></h1>
+        <h3>Current Balance (BTC): <font color='green'>{$bal}</font></h1>
         <h4>Unconfirmed Balance: <font color='red'>{$bal2}</font></h2>
         <hr />
         <h3>Send coins:</h3>
